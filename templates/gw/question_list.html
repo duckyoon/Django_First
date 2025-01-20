@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}"> -->
+
+
+<div class="container my-3">
+    <table class="table">
+        <thead>
+        <tr class="table-dark">
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성일시</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if question_list %}
+        {% for question in question_list %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                <!-- <li><a href="/gw/{{ question.id }}">{{ question.subject }}</a></li> -->
+                <li><a href="{% url 'gw:detail' question.id %}">{{ question.subject }}</a></li>
+                <!-- 파라미터를 두 개 이상 사용할 경우, 공백 문자 뒤에 추가로 붙여줄 수 있다. -->
+            </td>
+            <td>{{ question.create_date }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="3">질문이 없습니다.</td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+    <a href="{% url 'gw:question_create' %}" class="btn btn-primary">질문 등록하기</a>
+</div>
+
+{% endblock content %}
+
