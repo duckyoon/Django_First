@@ -179,7 +179,48 @@
 - 페이징
 	1. 페이징 기능을 사용하기 위해, Paginator 클래스를 사용
 
+- 템플릿 필더
+	1. 목록에서 게시물 번호를 차례대로 출력하기 위해 사용
+	2. templatetags 디렉터리 생성하여 gw_filter.py 파일로 사용한다.
+	3. 적용 템플릿에 {% load gw_filter %}를 사용한다.
+     	※ 이 때, extends 문이 있을 경우 extends 문 다음에 위치
+
+- 질문 옆 답변 개수 표시
+	1. question의 answer 개수가 0 이상이면 표시
+	2. quesiton을 표시하는 제목 오른쪽에 위치한다.
+	3. {% if question.answer_set.count > 0 %}
+                    <span class="text-danger small mx-2"> 			{{ question.answer_set.count }}</span>
+                    {% endif %}
 
 
+- 로그인, 로그아웃(django.contirb.auth)
+	1. 장고 프로젝트 생성 시, 자동으로 추가됨. (settings.py 확인)
+	2. 로그인 로그아웃은 공통 기능을 가진 앱으로 별도의 common 앱을 만들어 사용한다.
+
+	3. common 앱 생성
+		- `django-admin startapp common`
+	4. settings.py 파일에 common 앱 등록
+		- `"common.apps.CommonConfig"`
+	5. 앱 사용을위한 config/urls.py 파일 수정
+		- `path('common/', include('common.urls')),`
+	6. common/urls.py 파일 생성 
+
+	7. 로그인 기능 구현
+		1. 네비게이션 바에 로그인 링크 수정
+			- `<a class="nav-link" href="{% url 'common:login' %}">로그인</a>`
+
+		2. common:login를 사용했으므로 common/urls.py 파일 경로 추가
+			- `path('login/', auth_views.LoginView.as_view(template_name='common/login.html'), name='login')`
+		3. templates 디렉터리에 common 디렉터리 생성하고 login.html 생성하여 구현 
+		
+		4. form_errors.html 템플릿 파일 구현
+			- 로그인 실패시 왜 실패했는지 알려주는 역할.
+			- 필드 오류와 넌필드 오류 둘다 구현
+			- 필드 오류(field.errors) : 입력한 필드 값에 대한 오류
+			- 넌필드 오류(form.non_field_errors) : 필드의 값과는 상관없이 발생하는 오류
+
+		5. 이전에 생성한 admin/1111 계정으로 로그인하면 /accounts/profile/ 이라는 url로 보내는데 /url로 이동하도록 settings.py 파일을 수정한다.
+			- `LOGIN_REDIRECT_ULR = '/'`
+			- 이후 config/urls.py 에 / 페이지에 대응하는 url 규칙을 추가
 
 

@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from gw import views
 
 #from gw import views
 
@@ -42,5 +43,7 @@ urlpatterns = [
     # gw/로 시작하는 페이지를 요청하면 gw/urls.py 파일의 매핑 정보를 읽어서 처리하게 함.
     # gw내에 urls.py 파일을 생성한다.
     
+    path('common/', include('common.urls')),
     
+    path('', views.index, name='index') # '/'에 해당하는 path 설정
 ]

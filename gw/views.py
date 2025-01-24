@@ -33,7 +33,7 @@ def detail(request, question_id):
 
 def answer_create(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = AnswerForm(request.POST)
         if form.is_valid():
             answer = form.save(commit=False)
@@ -43,7 +43,7 @@ def answer_create(request, question_id):
             return redirect('gw:detail', question_id=question.id)
     else:
         return HttpResponseNotAllowed('Only POST is possible.')
-    context = {'form':form}
+    context = {'question':question, 'form':form}
     return render(request, 'gw/question_detail.html', context)
     
             

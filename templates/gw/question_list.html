@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load gw_filter %}
+{% load gw_filter %} 
 {% block content %}
 <!-- {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}"> -->
@@ -24,8 +24,14 @@
             </td>
             <td>
                 <!-- <li><a href="/gw/{{ question.id }}">{{ question.subject }}</a></li> -->
-                <li><a href="{% url 'gw:detail' question.id %}">{{ question.subject }}</a></li>
+                <li>
+                    <a href="{% url 'gw:detail' question.id %}">{{ question.subject }}</a>
+                    {% if question.answer_set.count > 0 %}
+                    <span class="text-danger small mx-2"> {{ question.answer_set.count }}</span>
+                    {% endif %}
+                </li>
                 <!-- 파라미터를 두 개 이상 사용할 경우, 공백 문자 뒤에 추가로 붙여줄 수 있다. -->
+
             </td>
             <td>{{ question.create_date }}</td>
         </tr>
