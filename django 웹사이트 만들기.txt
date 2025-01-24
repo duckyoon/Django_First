@@ -1,0 +1,185 @@
+* django 웹사이트 만들기
+
+1. 가상환경 만들기
+ - 여러 프로젝트 진행을 대비해 가상환경으로 실습 진행한다.
+ - `conda create -n website`
+ - `conda activate website`
+
+2. django 설치
+ - `pip install django`
+
+3. 장고 프로젝트 생성
+	1. 프로젝트 생성
+	 - 원하는 디렉터리로 이동해서 명령어 입력한다.
+	 -  `django-admin startproject config .`
+	2. 서버 구동
+	 - `python manage.py runserver`
+	 - http://127.0.0.1:8000/ 를 url에 치면 웹사이트 접속 가능하다.
+
+4. 설정값 수정 settings.py
+	1. 언어, 시간 수정
+	 - `LANGUAGE_CODE = 'ko-kr'`
+	 - `TIME_ZONE = 'Asia/Seoul'`
+
+5. 앱 생성
+	- 프로젝트에 기능을 추가하기 위해 앱을 생성한다
+	1. 앱 생성
+	 - django-admin startapp <앱이름>
+	 - `django-admin startapp gw`
+
+	2. 하위 폴더
+		1. migrations : 데이터베이스 테이블을 생성하고 수정하기 위한 파일 관리
+		2. admin.py : 관리자 화면을 구성하는 파일(관리자 화면 제어 가능)
+		3. apps.py : 앲의 구성 정보를 정의
+		4. models.py : 데이터베이스 모델을 정의
+		5. tests.py : 앱을 테스트
+		6. views.py : 앱의 기능을 구현하는 파일
+
+
+- 모델
+	- 모델을 사용하면 SQL쿼리문 없이 데이터를 쉽게 처리 가능(ORM사용)
+
+6. 초기세팅
+	1. URL 분리
+		- config/urls.py 파일은 프로젝트 전반적인 URL을 관리하는 파일로, 앱별 URL은 여기에 포함시키지 않는다
+		- config/urls.py 에 include를 사용하여 gw/url.py 파일을 만든다.
+	2. python manage.py migrate
+		- 장고 프로젝트를 생성할 때 기본적으로 설치되는 앱을 migratge 진행
+	3. DB(sqllite) 연결
+	4. 모델 작성
+		- gw/models.py에 모델을 정의
+	5. 테이블 생성
+		- config/settings.py에 INSTALLED_APPS 항목에 추가("gw.apps.GwConfig")
+		- python manage.py makemigrations
+			- 모델이 새로 생성되거나 변경되는 경우, makemigrations 명령을 먼저 실행해서 마이그레이션 파일을 생성한뒤, 이 파일을 기반으로 migrate 명령을 수행해야한다.
+			- 해당 명령은 장고가 테이블 작업을 수행하기 위한 작업 파일(0001_initial.py)을 생성한느데 사용 (실제 작업은 migrate 명령을 통해서만 이루어짐.
+		- 실제 어떤 쿼리문이 실행됬는지 확인하기 위해서 sqlmigrate 명령어를 사용한다
+			- python manage.py sqlmigrate gw 0001
+		- migrate 명령으로 실제 테이블 생성한다(python manage.py migrate)
+		- 이후 SQLite 디비로 확인하면 gw_answer, gw_question 테이블이 생성된 것 확인가능(코딩 시에는 테이블명 대신 Question, Answer과 같은 모델을 사용)
+		
+
+- 모델 사용하기(shell)
+	1. 모델 사용을 위해서는 장고 쉘을 통해 실행 가능하다
+		- python manage.py shell
+	2. 생성한 Question, Answer 모델을 import하여 사용한다
+		- from gw.models import Question, Answer
+		- from django.utils import timezone
+	3. 데이터 생성(모델에 
+		- q = Question(subject='pybo가 무엇인가요?', content='pybo에 대해서 알고 싶습니다.', create_date=timezone.now())
+ 	4. 데이터 저장
+		- q.save()
+		- 데이터베이스에 Question 데이터 1건이 저장된다.
+	5. 데이터 탐색
+		- q.id => id 확인(id는 모델의 고유값으로 pk이다. 데이터를 생성할 때마다 1씩 증가한다)
+
+		- Question.objects.all()
+			- 모델의 데이터는 Question.objects 를 통해 조회 가능하다
+			- all()은 모든 Question 데이터를 조회하는 함수
+			- 조회시 기본 값으로는 id가 조회되는데 모델에 __str__ 메서드를 추가하면 id 대신 다른 값이 보이게 할 수 있다.
+		- Question.objects.filter(id=1)
+			- 해당 filter로 조건에 해당하는 데이터를 모두 리턴(Queryset 객체가 리턴)
+		- Question.ojbect.get(id=1)
+			- 조건에 해당하는 한 건만 리턴(Question 모델 객체 리턴)
+			- 1건의 데이터를 조회할 때 사용
+
+
+	6. 데이터 수정
+		- q = Question.objects.get(id=1) # 특정데이터 찾고
+		- q.subject = "Django Model Quesetion" #데이터삽입해서 변경한다
+		- q.save() # 저장해서 결과 반영
+
+	7. 데이터 삭제
+		- q = Question.subjects.get(id=2)# 특정데이터 찾고
+		- q.delete() # 데이터 삭제
+
+	8. 답변 데이터 작성(답변 데이터는 Question 객체를 외래키로 가진다.)
+		1. 데이터 생성
+			- q = Question.objects.get(id=2)
+			- a = Answer(question=q, content='장고 보델 답변', create_date=timezone.now())
+			- a.save()
+			
+	9. Question에 연결된 Answer 가져오기
+		- q.answer_set.all()
+
+- 장고 관리자 기능 사용
+	1. 슈퍼 유저 생성
+		- python manage.py createsuperuser
+	2. 관리자 화면 접속
+		- url -> http://127.0.0.1:8000/admin/
+	3. 모델 관리
+		- admin.py 파일에 Question 모델을 추가해서 관리자 화면에서 관리할 수 있다.
+			- from .models import Question
+			- admin.site.register(Question)
+	4. 모델 검색하기
+		- admin.py 파일에 다음과 같이 class 추가하여 수정한다
+			- class QuestionAdmin(admin.ModelAdmin):
+  			-   search_fields = ['subject']
+			- admin.site.register(Question, QuestionAdmin)
+			- 이제 관리자 화면에서 모델을 클릭하면 검색할 수 있다.
+		
+ - 템플릿 사용
+	1. html 파일과 같은 템플릿 파일은 프로젝트 폴더 밑에 폴더를 만든다.
+	2. 모든 앱이 공용으로 사용할 템플릿은 해당 templates/파일 로 저장하고, gw 앱이 사용할 템플릿 디렉터리는 templates/gw/파일로 저장, common 앱이 사용할 템플릿은 templates/common/파일로 사용한다.
+
+	3. 없는 데이터를 요청할 경우, 500 오류보다는 404로 요청하게 한다.
+		- review.py에 `from django.shortcuts import render, get_object_or_404` 추가
+		- 항목 수정(question)
+		- # question = Question.objects.get(id=question_id)
+    		  question = get_object_or_404(Question, pk=question_id)
+
+	- 제네릭 뷰를 사용하면 매우 편리하지만 내부적으로 어떻게 동작하는지 어려움 (좀 익숙해지면 사용 진행)
+
+- URL 별칭(URL 하드코딩 없애기)
+	- 실제 프로젝트에서는 URL 리팩토링이 자주 발생한다. 이 경우 사용된 모든 URL을 일일이 수정해야 하는 위험이 있는데, 해당 URL의 실제 주소 대신 1:1로 매핑된 별칭을 사용하면 이를 줄일 수 있다.
+	- 사용 방법 
+		1. URL 매핑에 name 속성을 부여(urls.py 의 urlpatterns에 추가)
+			- `path('<int:question_id>/', views.detail, name='detail')`
+		2. 템플릿에서 URL 별칭 사용
+			- <li><a href="/gw/{{ question.id }}">{{ question.subject }}</a></li>를
+			- <li><a href="{% url 'detail' question.id %}">{{ question.subject }}</a></li> 로 수정한다
+		3. 다른 앱이 프로젝트에 추가될 경우를 대비해 네임스페이스를 사용한다
+			1. urls.py에 app_name을 추가
+		4. 최종적으로 템플릿 URL에 네임스페이스와 URL 별칭을 사용한다.
+			- <li><a href="{% url 'gw:detail' question.id %}">{{ question.subject }}</a></li>
+
+
+- 디자인 적용(스타일시트)
+	1. static 디렉터리 생성
+		- 스타일시트 파일은 static디렉터리에 저장하는데, 템플릿 디렉터리처럼 settings.py 파일에 등록해서 사용한다.
+	2. 템플릿에 스타일 적용
+		1. 템플릿의 최상단에 {% load static %} 태그를 삽입한다. (이를 통해 {% 와 같은 템플릿 테그 사용 가능%}
+	3. 부트스트랩 css 파일 사용
+		- 부트스트랩 다운로드해서 static 폴더에 넣고 link로 사용한다
+
+- 템플릿 상속(extend)
+	1. 웹브라우저에서 웹페이지가 동일하게 보이게 하기 위해서는 표준 HTML 문서를 작성해야 한다.
+	2. 표준 HTML문서에서 <html>, <head>, <meta>와 같은 동일한 내용은 중복되므로, 템플릿 상속 extend 기능을 사용한다.
+	3. 기본 구조를 정의할 base.html을 작성해서 사용한다.
+	4. 이후 다른 템플릿에 base.html을 extend하고, 내용을 {% block content %} 안에 넣는다.
+	5. 이 때, {% extends 'base.html' %} 는 반드시 템플릿의 최상단 줄에 위치해야 한다.(위에 주석 있으면 에러발생함)
+
+- From 사용
+	1. 폼은 페이지 요청 시 전달되는 파라미터들을 쉽게 관리하기 위해 사용하는 클래스.
+	2. 필수 파라미터 값이 누락되지는 않았는지, 형식이 적절한지 등을 검증하는데 사용
+	3. form.py 파일을 만들고, QuestionForm 폼을 생성한다.
+
+	4. 폼 위젯
+		- form.as_p 태그는 HTML 태그를 자동으로 생성하기 때문에 스타일을 직접 적용할 수 없다. -> form.py에 정의된 QuestionForm에 widgets 속성을 지정해서 입력 필드에 부트스트랩 클래스를 추가한다.
+
+	5. 폼 레이블
+		- 현재 웹사이트에 표시되는 레이블은 영어로 표시되는데 한글로 표시하고 싶으면 위젯과 마찬가지로 QuestionForm 속성에 labels 속성을 지정하면 된다.
+
+
+- 네비게이션 바
+	1. 페이지 상단에 고정되어 페이지를 이동할 수 있는 네비게이션 바를 생성한다.
+	2. 네비게시션바는 모든 페이지에서 공통적으로 보여야 하므로, base.html에 생성한다.
+	3. 이후, 네비게이션바 HTML 코드는 navbar.html 템플릿으로 넣고, base.html에 include 태그로 포함시킨다.
+
+- 페이징
+	1. 페이징 기능을 사용하기 위해, Paginator 클래스를 사용
+
+
+
+
+

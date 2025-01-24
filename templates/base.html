@@ -13,9 +13,12 @@
     <title>Hello, gw!</title>
 </head>
 <body>
+    <!-- 네비게이션바 -->
+    {% include "navbar.html" %}
     <!-- 기본 템플릿 안에 삽입될 내용 Start -->
     {% block content %}
     {% endblock content %}
     <!-- 기본 템플릿 안에 삽입될 내용 End -->
+     <script src="{% static 'bootstrap.min.js' %}"></script>
 </body>
 </html>

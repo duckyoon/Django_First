@@ -3,6 +3,7 @@ from django.utils import timezone
 from .models import Question, Answer
 from .form import QuestionForm, AnswerForm
 from django.http import HttpResponseNotAllowed
+from django.core.paginator import Paginator
 # Create your views here.
 
 # from django.http import HttpResponse
@@ -11,8 +12,14 @@ from django.http import HttpResponseNotAllowed
 #     return HttpResponse("gw 페이지입니다.")
 
 def index(request):
+    # GET 방식으로 호출된 url에서 page 값을 가져오고 디폴트 1로 설정
+    page = request.GET.get('page', '1')
     question_list = Question.objects.order_by('-create_date')
-    context = {'question_list' : question_list}
+    
+    paginator = Paginator(question_list, 10) # 페이지당 10개씩 보여준다.
+    page_obj = paginator.get_page(page)
+        
+    context = {'question_list' : page_obj}
     # render는 파이썬 데이터를 HTML로 반환
     # question_list.html과 같은 파일을 템플릿이라 부름. 별도의 템플릿 디렉터리에 생성한다.
     # 템플릿을 저장할 기본 디렉터리는 settings.py에 TEMPLATES 항목에 설정한다.
