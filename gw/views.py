@@ -4,6 +4,7 @@ from .models import Question, Answer
 from .form import QuestionForm, AnswerForm
 from django.http import HttpResponseNotAllowed
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 # from django.http import HttpResponse
@@ -31,18 +32,20 @@ def detail(request, question_id):
     context = {'question' : question}
     return render(request, 'gw/question_detail.html', context)
 
+@login_required(login_url='common:login') # 로그아웃 상태에서 함수가 호출되면 자동으로 로그인 화면으로 이동시킴
 def answer_create(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     if request.method == "POST":
         form = AnswerForm(request.POST)
         if form.is_valid():
             answer = form.save(commit=False)
+            answer.author = request.user # author 속성에 로그인 계정
             answer.create_date = timezone.now()
             answer.question = question
             answer.save()
             return redirect('gw:detail', question_id=question.id)
     else:
-        return HttpResponseNotAllowed('Only POST is possible.')
+        form = QuestionForm()
     context = {'question':question, 'form':form}
     return render(request, 'gw/question_detail.html', context)
     
@@ -52,11 +55,13 @@ def answer_create(request, question_id):
     # answer.save()
     # return redirect('gw:detail', question_id=question.id)
 
+@login_required(login_url='common:login') # 로그아웃 상태에서 함수가 호출되면 자동으로 로그인 화면으로 이동시킴
 def question_create(request):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
         if form.is_valid():
-            question = form.save(commit=False) # 임시 저장(데이터페이스 업로드x)
+            question = form.save(commit=False) # 임시 저장(데이터베이스 업로드x)
+            question.author = request.user # author 속성에 로그인 계정 저장
             question.create_date = timezone.now() # 작성일시 저장
             question.save() # 데이터 실제로 저장
             return redirect('gw:index')
