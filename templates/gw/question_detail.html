@@ -12,8 +12,9 @@
         <div class="card-body">
             <div class="card-text" style="white-space: pre-line;">{{ question.content }}</div>
             <div class="d-flex justify-content-end">
-                <div class="badge bg-light text-dark p-2">
-                    {{ question.create_date }}
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">{{ question.author.username }}</div> <!--질문부분 글쓴이 추가-->
+                    <div>{{ question.create_date }}</div>
                 </div>
             </div>
         </div>
@@ -25,8 +26,9 @@
         <div class="card-body">
             <div class="card-text" style="white-space: pre-line;">{{ answer.content }}</div>
             <div class="d-flex justify-content-end">
-                <div class="badge bg-light text-dark p-2">
-                    {{ answer.create_date }}
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">{{ question.author.username }}</div> <!-- 답변부분 글쓴이 추가-->
+                    <div>{{ answer.create_date }}</div>
                 </div>
             </div>
         </div>

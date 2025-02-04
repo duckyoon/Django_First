@@ -8,21 +8,22 @@
 <div class="container my-3">
     <table class="table">
         <thead>
-        <tr class="table-dark">
+        <tr class="text-center table-dark">
             <th>번호</th>
-            <th>제목</th>
+            <th style="width:50%">제목</th>
+            <th>글쓴이</th>
             <th>작성일시</th>
         </tr>
         </thead>
         <tbody>
         {% if question_list %}
         {% for question in question_list %}
-        <tr>
+        <tr class="text-center">
             <td>
                 <!-- 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 -->
                 {{ question_list.paginator.count|sub:question_list.start_index|sub:forloop.counter0|add:1 }}
             </td>
-            <td>
+            <td class="text-start">
                 <!-- <li><a href="/gw/{{ question.id }}">{{ question.subject }}</a></li> -->
                 <li>
                     <a href="{% url 'gw:detail' question.id %}">{{ question.subject }}</a>
@@ -31,14 +32,14 @@
                     {% endif %}
                 </li>
                 <!-- 파라미터를 두 개 이상 사용할 경우, 공백 문자 뒤에 추가로 붙여줄 수 있다. -->
-
             </td>
+            <td>{{ question.author.username }}</td> <!-- 글쓴이 추가-->
             <td>{{ question.create_date }}</td>
         </tr>
         {% endfor %}
         {% else %}
         <tr>
-            <td colspan="3">질문이 없습니다.</td>
+            <td colspan="4">질문이 없습니다.</td>
         </tr>
         {% endif %}
         </tbody>
