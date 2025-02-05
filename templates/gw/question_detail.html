@@ -6,6 +6,16 @@
 
 
 <div class="container my-3">
+    <!-- message 표시(비정상적으로 질문을 수정할 경우, 오류 표시) -->
+     {% if messages %}
+     <div class="alert alert-danger my-3" role="alert">
+        {% for message in messages %}
+        <strong> {{ message.tags }}</strong>
+        <ul><li> {{ message.message }} </li></ul>
+        {% endfor %}
+     </div>
+     {% endif %}
+
     <!-- 질문 -->
     <h2 class="border-bottom py-2">{{ question.subject }}</h2>
     <div class="card my-3">
@@ -17,8 +27,21 @@
                     <div>{{ question.create_date }}</div>
                 </div>
             </div>
+            <!-- 수정 버튼 -->
+            <div class="my-3">
+                {% if request.user == question.author %}
+                <a href="{% url 'gw:question_modify' question.id %}" 
+                    class="btn btn-sm btn-outline-secondary">수정</a>
+                    <a href="javascript:void(0)" class="delete btn btn-sm btn-outline-secondary"
+                    data-uri="{% url 'gw:question_delete' question.id  %}">삭제</a>
+                    <!-- javascript:void(0) : 해당 링크를 클릭해도 동작하지 않음 -->
+                    <!-- data-uri : 삭제를 실행할 url을 얻기 위해 사용-->
+                    <!-- href에 삭제 url을 넣지 않는 이유는 삭제 버튼을 클릭했을 때, 확인창을 띄우기 위해 -->
+                {% endif %}
+            </div>
         </div>
     </div>
+
     <!-- 답변 -->
     <h5 class="border-bottom my-3 py-2">{{question.answer_set.count}}개의 답변이 있습니다.</h5>
     {% for answer in question.answer_set.all %}
@@ -34,6 +57,7 @@
         </div>
     </div>
     {% endfor %}
+
     <!-- 답변 등록 -->
     <form action="{% url 'gw:answer_create' question.id %}" method="post" class="my-3">
         {% csrf_token %}
@@ -51,6 +75,7 @@
         </div>
         {% endif %}
         <!-- 오류표시 End -->
+
         <div class="mb-3">
             <label for="content" class="form-label">답변내용</label>
             <!-- 로그인 안되어 있을 때, 답변 내용 입력창 disabled 설정 -->
@@ -61,4 +86,16 @@
     </form>
 </div>
 {% endblock content %}
-
+{% block script %}
+<!-- delete라는 클래스를 포함하는 컴포넌트를 클릭하면 한번더 질문을 하고, 확인을 했을 때, 해당 컨포넌트의 data-uri 값으로 uri를 호출 -->
+<script type='text/javascript'>
+    const delete_elements = document.getElementsByClassName("delete");
+    Array.from(delete_elements).forEach(function(element) {
+        element.addEventListener('click', function() {
+            if(confirm("정말로 삭제하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            };
+        });
+    });
+    </script>
+{% endblock script %}

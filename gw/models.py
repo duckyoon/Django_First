@@ -10,6 +10,7 @@ class Question(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField(default=now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    modify_date = models.DateTimeField(null=True, blank=True) # 수정 일시 추가, null 허용, 값 없어도 허용
     
     def __str__(self):
         return self.subject
@@ -21,3 +22,4 @@ class Answer(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField(default=now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
+    modify_date = models.DateTimeField(null=True, blank=True) # 수정 일시 추가, null 허용, 값 없어도 허용
