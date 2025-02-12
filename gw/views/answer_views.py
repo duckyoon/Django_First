@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, resolve_url
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -19,7 +19,12 @@ def answer_create(request, question_id):
             answer.create_date = timezone.now()
             answer.question = question
             answer.save()
-            return redirect('gw:detail', question_id=question.id)
+            # return redirect('gw:detail', question_id=question.id)
+            # HTML을 호출하는 URL 뒤에 #page를 붙여주면 해당 페이지가 호출되면서 해당 앵커로 스크롤이 이동
+            # resolve_url은 실제 호출되는 url 문자열을 리턴하는 장고의 함수
+            return redirect('{}#answer_{}'.format(
+                resolve_url('gw:detail', question_id=question.id), answer.id
+            ))
     else:
         form = QuestionForm()
     context = {'question':question, 'form':form}
@@ -38,7 +43,10 @@ def answer_modify(request, answer_id):
             answer = form.save(commit=False)
             answer.modify_date = timezone.now()
             answer.save()
-            return redirect('gw:detail', question_id=answer.question.id)
+            # return redirect('gw:detail', question_id=answer.question.id)
+            return redirect('{}#answer_{}'.format(
+                resolve_url('gw:detail', question_id=answer.question.id), answer.id
+            ))
     else:
         form = AnswerForm(instance=answer)
     context = {'form' : form}
@@ -60,4 +68,7 @@ def answer_vote(request, answer_id):
         messages.error(request, '본인이 작성한 글은 추천할 수 없음')
     else:
         answer.voter.add(request.user)
-    return redirect('gw:detail', question_id=answer.question.id)
+    # return redirect('gw:detail', question_id=answer.question.id)
+    return redirect('{}#answer_{}'.format(
+            resolve_url('gw:detail', question_id=answer.question.id), answer.id
+    ))
